@@ -31,7 +31,10 @@ def main():
 	# print(test_cache)
 	print("OUTPUT")
 	print(test_output.shape)
-	test_grad_dict = test_nn.backprop(y_train, test_output, test_cache)
+	print(test_output[0:10] * 10) # currently the output is between 0 and 1, 
+	# need to shift to be between 0 and 9 in order to be accurate y_hat approximation
+	print(y_train[0:10])
+	test_grad_dict = test_nn.backprop(y_train, test_output * 10, test_cache)
 	print(test_grad_dict.keys())
 	# print(test_grad_dict)
 
