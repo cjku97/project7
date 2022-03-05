@@ -23,20 +23,21 @@ def main():
 	test_arch = [{'input_dim': 64, 'output_dim': 16, 'activation': 'sigmoid'},
 				 {'input_dim': 16, 'output_dim': 64, 'activation': 'sigmoid'},
 				 {'input_dim': 64, 'output_dim': 1, 'activation': 'sigmoid'}]
-	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 0.01, seed = 9, batch_size = 10,
-								epochs = 10, loss_function = "bce")
-	# print("PARAMETER DICTIONARY:")
-	# print(test_nn._param_dict)
-	(test_output, test_cache) = test_nn.forward(X_train.T)
-	# print(test_cache)
-	print("OUTPUT")
-	print(test_output.shape)
-	print(test_output[0:10] * 10) # currently the output is between 0 and 1, 
-	# need to shift to be between 0 and 9 in order to be accurate y_hat approximation
-	print(y_train[0:10])
-	test_grad_dict = test_nn.backprop(y_train, test_output * 10, test_cache)
-	print(test_grad_dict.keys())
-	# print(test_grad_dict)
+	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 1e-6, seed = 29, batch_size = 10,
+								epochs = 5, loss_function = "bce")
+	# Since the final layer is a sigmoid function, the outputc is between 0 and 1, 
+	# but the target digits are between 0 and 9. In order to make them match I divide
+	# the y_train and y_test arrays by 10.
+	(test_train_loss, test_val_loss) = test_nn.fit(X_train.T, y_train * 0.1, X_test.T, y_test * 0.1)
+	print(test_train_loss)
+	print(test_val_loss)
+	# plot losses
+	plt.figure()
+	plt.plot(test_train_loss, label = "Per Epoch Loss for Training Set")
+	plt.show()
+	
+	plt.figure()
+	plt.plot(test_val_loss, label = "Per Epoch Loss for Test Set")
 
 	
 

@@ -103,7 +103,7 @@ class NeuralNetwork:
             Z_curr: ArrayLike
                 Current layer linear transformed matrix.
         """
-        print("performing single forward pass")
+        # print("performing single forward pass")
         Z_curr = np.dot(W_curr, A_prev) + b_curr
         if activation.lower() == "sigmoid":
         	A_curr = self._sigmoid(Z_curr)
@@ -111,6 +111,8 @@ class NeuralNetwork:
         	A_curr = self._relu(Z_curr)
         else:
         	raise ValueError("Please use valid activation function")
+        print(np.mean(Z_curr))
+        print(np.mean(A_curr))
         return(A_curr, Z_curr)
 
     def forward(self, X: ArrayLike) -> Tuple[ArrayLike, Dict[str, ArrayLike]]:
@@ -133,6 +135,7 @@ class NeuralNetwork:
         print("n features: " + str(num_features))
         # initialize cache dictionary
         cache = {}
+        cache['X'] = X
         # iterate through layers of neural net
         for idx, layer in enumerate(self.arch):
             layer_idx = idx + 1
@@ -193,21 +196,21 @@ class NeuralNetwork:
             db_curr: ArrayLike
                 Partial derivative of loss function with respect to current layer bias matrix.
         """
-        print("performing single backward pass")
+        # print("performing single backward pass")
         if activation_curr.lower() == "sigmoid":
         	dZ_curr = self._sigmoid_backprop(dA_curr, Z_curr)
         elif activation_curr.lower() == "relu":
         	dZ_curr = self._relu_backprop(dA_curr, Z_curr)
         else:
         	raise ValueError("Current activation function is not valid")
-        print(np.shape(dZ_curr))
+        print("average dZ_curr:" + str(np.mean(dZ_curr)))
+        # print(np.shape(dZ_curr))
         dW_curr = dZ_curr @ np.linalg.inv(A_prev.T @ A_prev) @ A_prev.T
-        print(np.shape(dW_curr))
-        db_curr_T = np.linalg.inv(A_prev.T @ A_prev) @ A_prev.T @ dW_curr.T 
-        db_curr = db_curr_T.T
-        print(np.shape(db_curr))
+        # print(np.shape(dW_curr)) 
+        db_curr = np.sum(dZ_curr, axis = 1, keepdims = True)
+        # print(np.shape(db_curr))
         dA_prev = np.linalg.inv(W_curr.T @ W_curr) @ W_curr.T @ dZ_curr
-        print(np.shape(dA_prev))
+        # print(np.shape(dA_prev))
         return(dA_prev, dW_curr, db_curr)
 
     def backprop(self, y: ArrayLike, y_hat: ArrayLike, cache: Dict[str, ArrayLike]):
@@ -241,8 +244,7 @@ class NeuralNetwork:
             b = self._param_dict['b' + str(layer_idx)]
             # get A matrices
             if layer_idx == 1:
-            	break
-            	A_prev = X #A0 = X but how do I give it X? should I not do it like this?
+            	A_prev = cache['X']
             else:
             	A_prev = cache['A' + str(layer_idx-1)]
             # get Z matrices
@@ -256,12 +258,12 @@ class NeuralNetwork:
             		initial_dA = self._loss_function_backprop(y, y_hat)
             	else:
             		raise ValueError("Please use valid loss function")
-            	print(initial_dA.shape)
+            	# print(initial_dA.shape)
             	grad_dict['dA' + str(layer_idx)] = initial_dA
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, initial_dA, act_func)
             else:
             	dA = grad_dict['dA' + str(layer_idx)]
-            	print(dA.shape)
+            	# print(dA.shape)
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, dA, act_func)
             # add to gradient dict
             grad_dict['dW' + str(layer_idx)] = dW
@@ -281,7 +283,38 @@ class NeuralNetwork:
         Returns:
             None
         """
-        pass
+        print("UPDATING PARAMETERS")
+        # iterate through param dictionary
+        for idx, layer in enumerate(reversed(self.arch)):
+            layer_idx = idx + 1
+            print("layer: " + str(layer_idx))
+            # get weight matrix
+            W = self._param_dict['W' + str(layer_idx)]
+            # get bias matrix
+            b = self._param_dict['b' + str(layer_idx)]
+            # get weight change matrix
+            dW = grad_dict['dW' + str(layer_idx)]
+            # get bias change matrix
+            db = grad_dict['db' + str(layer_idx)]
+            # update weight matrix
+            print("update weight")
+            print(W.shape)
+            print(np.mean(W))
+            print(dW.shape)
+            print(np.mean(dW))
+            print((W - (self._lr * dW)).shape)
+            print(np.mean(W - (self._lr * dW)))
+            self._param_dict['W' + str(layer_idx)] = W - (self._lr * dW)
+            # update bias matrix
+            print("update bias")
+            print(b.shape)
+            print(np.mean(b))
+            print(db.shape)
+            print(np.mean(db))
+            print((b - (self._lr * db)).shape)
+            print(np.mean(b - (self._lr * db)))
+            self._param_dict['b' + str(layer_idx)] = b - (self._lr * db)
+        return
 
     def fit(self,
             X_train: ArrayLike,
@@ -307,7 +340,31 @@ class NeuralNetwork:
             per_epoch_loss_val: List[float]
                 List of per epoch loss for validation set.
         """
-        pass
+        # initialize
+        per_epoch_loss_train = []
+        per_epoch_loss_val = []
+        epoch_counter = 0
+        # loop through epochs
+        while epoch_counter < self._epochs:
+        	print("EPOCH: " + str(epoch_counter + 1))
+        	(train_output, train_cache) = self.forward(X_train)
+        	train_grad_dict = self.backprop(y_train, train_output, train_cache)
+        	self._update_params(train_grad_dict)
+        	train_predict = self.predict(X_train)
+        	val_predict = self.predict(X_val)
+        	if self._loss_func.lower() == "bce":
+        		per_epoch_loss_train.append(self._binary_cross_entropy(y_train, train_predict))
+        		per_epoch_loss_val.append(self._binary_cross_entropy(y_val, val_predict))
+        	elif self._loss_func.lower() == "mse":
+        		per_epoch_loss_train.append(self._mean_squared_error(y_train, train_predict))
+        		per_epoch_loss_val.append(self._mean_squared_error(y_val, val_predict))
+        	elif self._loss_fun.lower() == "other":
+        		per_epoch_loss_train.append(self._loss_function(y_train, train_predict))
+        		per_epoch_loss_val.append(self._loss_function(y_val, val_predict))
+        	else:
+        		raise ValueError("Please use valid loss function") 
+        	epoch_counter = epoch_counter + 1       
+        return(per_epoch_loss_train, per_epoch_loss_val)
 
     def predict(self, X: ArrayLike) -> ArrayLike:
         """
@@ -321,7 +378,9 @@ class NeuralNetwork:
             y_hat: ArrayLike
                 Prediction from the model.
         """
-        pass
+        print("MAKING PREDICTION")
+        (y_hat,_) = self.forward(X) # is this correct?
+        return(y_hat)
 
     def _sigmoid(self, Z: ArrayLike) -> ArrayLike:
         """
