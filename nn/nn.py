@@ -119,7 +119,7 @@ class NeuralNetwork:
 
         Args:
             X: ArrayLike
-                Input matrix with shape [batch_size, features].
+                Input matrix with shape [features, batch_size].
 
         Returns:
             output: ArrayLike
@@ -146,7 +146,7 @@ class NeuralNetwork:
             	if len(X) == layer['input_dim']:
             		(A, Z) = self._single_forward(W, b, X, act_func)
             	else:
-            		raise ValueError("Batch size must input dim of first layer")
+            		raise ValueError("Number of features must be input dim of first layer")
             else:
             	A_prev = cache['A' + str(layer_idx-1)]
             	if len(A_prev) == layer['input_dim']:
@@ -240,7 +240,11 @@ class NeuralNetwork:
             # get bias matrices
             b = self._param_dict['b' + str(layer_idx)]
             # get A matrices
-            A_prev = cache['A' + str(layer_idx-1)]
+            if layer_idx == 1:
+            	break
+            	A_prev = X #A0 = X but how do I give it X? should I not do it like this?
+            else:
+            	A_prev = cache['A' + str(layer_idx-1)]
             # get Z matrices
             Z = cache['Z' + str(layer_idx)]
             if idx == 0:
@@ -252,16 +256,17 @@ class NeuralNetwork:
             		initial_dA = self._loss_function_backprop(y, y_hat)
             	else:
             		raise ValueError("Please use valid loss function")
-            	print(initial_dA)
+            	print(initial_dA.shape)
+            	grad_dict['dA' + str(layer_idx)] = initial_dA
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, initial_dA, act_func)
             else:
             	dA = grad_dict['dA' + str(layer_idx)]
-            	print(dA)
+            	print(dA.shape)
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, dA, act_func)
             # add to gradient dict
-            grad_dict['dA' + str(layer_idx-1)] = dA_prev
             grad_dict['dW' + str(layer_idx)] = dW
-            grad_dict['db' + str(layer_idx)] = db           
+            grad_dict['db' + str(layer_idx)] = db   
+            grad_dict['dA' + str(layer_idx-1)] = dA_prev        
         return(grad_dict)
 
     def _update_params(self, grad_dict: Dict[str, ArrayLike]):
