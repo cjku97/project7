@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 from nn import (io, nn, preprocess)
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
 
 def main():
 	# simulate dataset
@@ -20,25 +25,41 @@ def main():
 	print(X_train.shape)
 	print(y_train.shape)
 	
-	test_arch = [{'input_dim': 64, 'output_dim': 16, 'activation': 'sigmoid'},
-				 {'input_dim': 16, 'output_dim': 64, 'activation': 'sigmoid'},
-				 {'input_dim': 64, 'output_dim': 1, 'activation': 'sigmoid'}]
-	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 1e-6, seed = 29, batch_size = 10,
-								epochs = 5, loss_function = "bce")
-	# Since the final layer is a sigmoid function, the outputc is between 0 and 1, 
-	# but the target digits are between 0 and 9. In order to make them match I divide
-	# the y_train and y_test arrays by 10.
-	(test_train_loss, test_val_loss) = test_nn.fit(X_train.T, y_train * 0.1, X_test.T, y_test * 0.1)
-	print(test_train_loss)
-	print(test_val_loss)
+	test_arch = [{'input_dim': 64, 'output_dim': 16, 'activation': 'relu'},
+				 {'input_dim': 16, 'output_dim': 64, 'activation': 'relu'},
+				 {'input_dim': 64, 'output_dim': 1, 'activation': 'relu'}]
+	test_arch2 = [{'input_dim': 64, 'output_dim': 32, 'activation': 'relu'},
+				  {'input_dim': 32, 'output_dim': 16, 'activation': 'relu'},
+				  {'input_dim': 16, 'output_dim': 32, 'activation': 'relu'},
+				  {'input_dim': 32, 'output_dim': 64, 'activation': 'relu'},
+				  {'input_dim': 64, 'output_dim': 1, 'activation': 'relu'}]
+	test_nn = nn.NeuralNetwork(nn_arch = test_arch2, lr = 0.001, seed = 29, batch_size = 500,
+								epochs = 50, loss_function = "mse")
+	
+	(test_train_loss, test_val_loss) = test_nn.fit(X_train.T, y_train, X_test.T, y_test)
+	
 	# plot losses
 	plt.figure()
-	plt.plot(test_train_loss, label = "Per Epoch Loss for Training Set")
+	plt.plot(test_train_loss)
+	plt.title("Per Epoch Loss for Training Set")
+	plt.xlabel('Epoch')
+	plt.ylabel('Loss')
 	plt.show()
 	
 	plt.figure()
-	plt.plot(test_val_loss, label = "Per Epoch Loss for Test Set")
-
+	plt.plot(test_val_loss)
+	plt.title("Per Epoch Loss for Test Set")
+	plt.xlabel('Epoch')
+	plt.ylabel('Loss')
+	plt.show()
+	
+	# Evaluate
+	model_pred = test_nn.predict(X_test.T)
+	model_pred_digit = np.floor(model_pred)
+	print('CONFUSION MATRIX')
+	print(confusion_matrix(y_test, model_pred_digit))
+	# print('CLASSFICATION REPORT')
+	# print(classification_report(y_test, model_pred_digit))
 	
 
 if __name__ == "__main__":

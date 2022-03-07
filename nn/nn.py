@@ -5,6 +5,7 @@
 import numpy as np
 from typing import List, Dict, Tuple, Union
 from numpy.typing import ArrayLike
+import random
 
 # Neural Network Class Definition
 class NeuralNetwork:
@@ -111,8 +112,6 @@ class NeuralNetwork:
         	A_curr = self._relu(Z_curr)
         else:
         	raise ValueError("Please use valid activation function")
-        print(np.mean(Z_curr))
-        print(np.mean(A_curr))
         return(A_curr, Z_curr)
 
     def forward(self, X: ArrayLike) -> Tuple[ArrayLike, Dict[str, ArrayLike]]:
@@ -121,7 +120,7 @@ class NeuralNetwork:
 
         Args:
             X: ArrayLike
-                Input matrix with shape [features, batch_size].
+                Input matrix with shape [num_features, batch_size].
 
         Returns:
             output: ArrayLike
@@ -139,14 +138,14 @@ class NeuralNetwork:
         # iterate through layers of neural net
         for idx, layer in enumerate(self.arch):
             layer_idx = idx + 1
-            print("layer: " + str(layer_idx))
+            # print("layer: " + str(layer_idx))
             act_func = layer['activation']
             # get weight matrices
             W = self._param_dict['W' + str(layer_idx)]
             # get bias matrices
             b = self._param_dict['b' + str(layer_idx)]
             if layer_idx == 1:
-            	if len(X) == layer['input_dim']:
+            	if num_features == layer['input_dim']:
             		(A, Z) = self._single_forward(W, b, X, act_func)
             	else:
             		raise ValueError("Number of features must be input dim of first layer")
@@ -203,13 +202,12 @@ class NeuralNetwork:
         	dZ_curr = self._relu_backprop(dA_curr, Z_curr)
         else:
         	raise ValueError("Current activation function is not valid")
-        print("average dZ_curr:" + str(np.mean(dZ_curr)))
         # print(np.shape(dZ_curr))
-        dW_curr = dZ_curr @ np.linalg.inv(A_prev.T @ A_prev) @ A_prev.T
+        dW_curr = dZ_curr.dot(A_prev.T)
         # print(np.shape(dW_curr)) 
         db_curr = np.sum(dZ_curr, axis = 1, keepdims = True)
         # print(np.shape(db_curr))
-        dA_prev = np.linalg.inv(W_curr.T @ W_curr) @ W_curr.T @ dZ_curr
+        dA_prev = dW_curr.T.dot(dZ_curr)
         # print(np.shape(dA_prev))
         return(dA_prev, dW_curr, db_curr)
 
@@ -230,13 +228,13 @@ class NeuralNetwork:
             grad_dict: Dict[str, ArrayLike]
                 Dictionary containing the gradient information from this pass of backprop.
         """
-        print("BACKWARD")
+        # print("BACKWARD")
         # initialize gradient dictionary
         grad_dict = {}
         # iterate through layers of neural net
         for idx, layer in enumerate(reversed(self.arch)):
             layer_idx = len(self.arch) - idx
-            print("layer: " + str(layer_idx))
+            # print("layer: " + str(layer_idx))
             act_func = layer['activation']
             # get weight matrices
             W = self._param_dict['W' + str(layer_idx)]
@@ -258,12 +256,10 @@ class NeuralNetwork:
             		initial_dA = self._loss_function_backprop(y, y_hat)
             	else:
             		raise ValueError("Please use valid loss function")
-            	# print(initial_dA.shape)
             	grad_dict['dA' + str(layer_idx)] = initial_dA
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, initial_dA, act_func)
             else:
             	dA = grad_dict['dA' + str(layer_idx)]
-            	# print(dA.shape)
             	(dA_prev, dW, db) = self._single_backprop(W, b, Z, A_prev, dA, act_func)
             # add to gradient dict
             grad_dict['dW' + str(layer_idx)] = dW
@@ -283,7 +279,7 @@ class NeuralNetwork:
         Returns:
             None
         """
-        print("UPDATING PARAMETERS")
+        # print("UPDATING PARAMETERS")
         # iterate through param dictionary
         for idx, layer in enumerate(reversed(self.arch)):
             layer_idx = idx + 1
@@ -297,22 +293,12 @@ class NeuralNetwork:
             # get bias change matrix
             db = grad_dict['db' + str(layer_idx)]
             # update weight matrix
-            print("update weight")
-            print(W.shape)
-            print(np.mean(W))
-            print(dW.shape)
-            print(np.mean(dW))
-            print((W - (self._lr * dW)).shape)
-            print(np.mean(W - (self._lr * dW)))
+            print("mean weight: " + str(np.mean(W)))
+            print("mean weight change: " + str(np.mean(self._lr * dW)))
             self._param_dict['W' + str(layer_idx)] = W - (self._lr * dW)
             # update bias matrix
-            print("update bias")
-            print(b.shape)
-            print(np.mean(b))
-            print(db.shape)
-            print(np.mean(db))
-            print((b - (self._lr * db)).shape)
-            print(np.mean(b - (self._lr * db)))
+            print("mean bias: " + str(np.mean(b)))
+            print("mean bias change: " + str(np.mean(self._lr * db)))
             self._param_dict['b' + str(layer_idx)] = b - (self._lr * db)
         return
 
@@ -347,11 +333,19 @@ class NeuralNetwork:
         # loop through epochs
         while epoch_counter < self._epochs:
         	print("EPOCH: " + str(epoch_counter + 1))
-        	(train_output, train_cache) = self.forward(X_train)
-        	train_grad_dict = self.backprop(y_train, train_output, train_cache)
-        	self._update_params(train_grad_dict)
+        	# get random batch
+        	batch_cols = random.sample(range(len(X_train[0])), self._batch_size)
+        	X_batch = X_train[:, batch_cols]
+        	y_batch = y_train[batch_cols]
+        	# train on random batch
+        	(batch_output, batch_cache) = self.forward(X_batch)
+        	batch_grad_dict = self.backprop(y_batch, batch_output, batch_cache)
+        	self._update_params(batch_grad_dict)
+        	# get predictions
         	train_predict = self.predict(X_train)
         	val_predict = self.predict(X_val)
+        	print(val_predict[0:10])
+        	print(y_val[0:10])
         	if self._loss_func.lower() == "bce":
         		per_epoch_loss_train.append(self._binary_cross_entropy(y_train, train_predict))
         		per_epoch_loss_val.append(self._binary_cross_entropy(y_val, val_predict))
@@ -428,7 +422,7 @@ class NeuralNetwork:
         """
         sig_Z = self._sigmoid(Z)
         sig_prime_Z = sig_Z * (1 - sig_Z)
-        dZ = dA/sig_prime_Z
+        dZ = dA * sig_prime_Z # changed from divide to multiply to see if that helps
         return(dZ)
 
     def _relu_backprop(self, dA: ArrayLike, Z: ArrayLike) -> ArrayLike:
@@ -446,7 +440,7 @@ class NeuralNetwork:
                 Partial derivative of current layer Z matrix.
         """
         relu_prime_Z = (Z > 0) * 1
-        dZ = dA/relu_prime_Z
+        dZ = dA * relu_prime_Z # changed from divide to multiply to see if that helps
         return(dZ)
 
     def _binary_cross_entropy(self, y: ArrayLike, y_hat: ArrayLike) -> float:
