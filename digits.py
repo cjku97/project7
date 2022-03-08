@@ -26,13 +26,9 @@ def main():
 	print(y_train.shape)
 	
 	test_arch = [{'input_dim': 64, 'output_dim': 16, 'activation': 'relu'},
-				 {'input_dim': 16, 'output_dim': 64, 'activation': 'relu'},
+				 {'input_dim': 16, 'output_dim': 64, 'activation': 'sigmoid'},
 				 {'input_dim': 64, 'output_dim': 1, 'activation': 'relu'}]
-	test_arch2 = [{'input_dim': 64, 'output_dim': 32, 'activation': 'relu'},
-				  {'input_dim': 32, 'output_dim': 16, 'activation': 'relu'},
-				  {'input_dim': 16, 'output_dim': 32, 'activation': 'relu'},
-				  {'input_dim': 32, 'output_dim': 64, 'activation': 'relu'},
-				  {'input_dim': 64, 'output_dim': 1, 'activation': 'relu'}]
+
 	test_nn = nn.NeuralNetwork(nn_arch = test_arch2, lr = 0.001, seed = 29, batch_size = 500,
 								epochs = 50, loss_function = "mse")
 	
