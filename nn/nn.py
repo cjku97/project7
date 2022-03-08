@@ -196,19 +196,19 @@ class NeuralNetwork:
                 Partial derivative of loss function with respect to current layer bias matrix.
         """
         # print("performing single backward pass")
+        # dZ_curr = dA_curr * phi'(Z_curr)
         if activation_curr.lower() == "sigmoid":
         	dZ_curr = self._sigmoid_backprop(dA_curr, Z_curr)
         elif activation_curr.lower() == "relu":
         	dZ_curr = self._relu_backprop(dA_curr, Z_curr)
         else:
         	raise ValueError("Current activation function is not valid")
-        # print(np.shape(dZ_curr))
-        dW_curr = dZ_curr.dot(A_prev.T)
-        # print(np.shape(dW_curr)) 
+        # dW_curr = dA_curr * phi'(Z_curr) * A_prev = dZ_curr * A_prev
+        dW_curr = dZ_curr.dot(A_prev.T) 
+        # db_curr = sum of dZ_curr (???)
         db_curr = np.sum(dZ_curr, axis = 1, keepdims = True)
-        # print(np.shape(db_curr))
-        dA_prev = dW_curr.T.dot(dZ_curr)
-        # print(np.shape(dA_prev))
+        # dA_prev = dA_curr * phi'(Z_curr) * W_curr = dZ_curr * W_curr
+        dA_prev = W_curr.T.dot(dZ_curr)
         return(dA_prev, dW_curr, db_curr)
 
     def backprop(self, y: ArrayLike, y_hat: ArrayLike, cache: Dict[str, ArrayLike]):
@@ -344,6 +344,8 @@ class NeuralNetwork:
         	# get predictions
         	train_predict = self.predict(X_train)
         	val_predict = self.predict(X_val)
+        	print(val_predict[0:10])
+        	print(y_val[0:10])
         	if self._loss_func.lower() == "bce":
         		per_epoch_loss_train.append(self._binary_cross_entropy(y_train, train_predict))
         		per_epoch_loss_val.append(self._binary_cross_entropy(y_val, val_predict))
@@ -420,7 +422,7 @@ class NeuralNetwork:
         """
         sig_Z = self._sigmoid(Z)
         sig_prime_Z = sig_Z * (1 - sig_Z)
-        dZ = dA * sig_prime_Z # changed from divide to multiply to see if that helps
+        dZ = dA * sig_prime_Z 
         return(dZ)
 
     def _relu_backprop(self, dA: ArrayLike, Z: ArrayLike) -> ArrayLike:
@@ -438,7 +440,7 @@ class NeuralNetwork:
                 Partial derivative of current layer Z matrix.
         """
         relu_prime_Z = (Z > 0) * 1
-        dZ = dA * relu_prime_Z # changed from divide to multiply to see if that helps
+        dZ = dA * relu_prime_Z 
         return(dZ)
 
     def _binary_cross_entropy(self, y: ArrayLike, y_hat: ArrayLike) -> float:

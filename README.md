@@ -76,7 +76,7 @@ TODO:
 # Grading (50 points total)
 
 ## Implementation of API (15 points)
-* [NOT CORRECT] Proper implementation of NeuralNetwork class (13 points)
+* [FIXED MAYBE?] Proper implementation of NeuralNetwork class (13 points)
 * [DONE] Proper implementation of 'one_hot_encode_seqs' function (1 point)
 * [DONE] Proper implementation of 'sample_seqs' function (1 point)
 
@@ -91,7 +91,7 @@ TODO:
 * [DONE] Correctly read in all data (2 points)
 * Explanation of your sampling scheme (2 points)
 * [DONE] Proper generation of a training set and a validation set (2 point)
-* [MAYBE] Successfully train your classifeir (4 points)
+* [LOOKING BETTER] Successfully train your classifeir (4 points)
 * Explain the choice of your loss function in the jupyter notebook (2 points)
 * Plots of training and validation loss (2 points)
 * [DONE] Print out accuracy of the classifier on the testing set (1 point)

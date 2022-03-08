@@ -42,8 +42,8 @@ def main():
 				  {'input_dim': 17, 'output_dim': 68, 'activation': 'sigmoid'},
 				  {'input_dim': 68, 'output_dim': 1, 'activation': 'sigmoid'}]
 	
-	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 0.001, seed = 29, batch_size = 300,
-								epochs = 30, loss_function = "bce")
+	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 0.005, seed = 29, batch_size = 300,
+								epochs = 50, loss_function = "bce")
 	
 	(test_train_loss, test_val_loss) = test_nn.fit(X_train_encode.T, y_train, X_test_encode.T, y_test)
 	
