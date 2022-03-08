@@ -19,13 +19,17 @@ def main():
 	trim_negatives = preprocess.trim_seqs(negatives, len(positives[0]))
 	
 	# generate training set
-	all_seqs = positives + trim_negatives
-	all_labels = ([True] * len(positives)) + ([False] * len(trim_negatives))
+	all_seqs = np.asarray(positives + trim_negatives)
+	print(all_seqs.shape)
+	all_labels = np.asarray([True] * len(positives) + [False] * len(trim_negatives))
+	print(all_labels.shape)
 	(upsampled_seqs, upsampled_labels) = preprocess.sample_seqs(all_seqs, all_labels)
+	print(upsampled_seqs.shape)
+	print(upsampled_labels.shape)
 	X_train, X_test, y_train, y_test = train_test_split(upsampled_seqs, upsampled_labels, 
 														test_size=0.2, random_state=42)	
-	y_train = np.asarray(y_train) * 1
-	y_test = np.asarray(y_test) * 1
+	y_train = y_train * 1
+	y_test = y_test * 1
 	
 	# one hot encode sequences
 	X_train_encode = np.asarray(preprocess.one_hot_encode_seqs(X_train))

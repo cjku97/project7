@@ -64,10 +64,7 @@ def sample_seqs(
             List of sampled sequences which reflect a balanced class size
         sampled_labels: List[bool]
             List of labels for the sampled sequences
-    """
-    seqs = np.asarray(seqs)
-    labels = np.asarray(labels)
-    
+    """    
     # get minority class -- if the sum of the labels (T = 1, F = 0) is less than
     # half the length of the label list then there are more Falses than Trues
     min_class = sum(labels) < (len(labels)/2)
@@ -80,8 +77,8 @@ def sample_seqs(
     
     # upsample from minority class to match size of majority class
     upsample_class_min = np.random.choice(i_class_min, size = n_class_max, replace = True)
-    sampled_seqs = np.append(seqs[upsample_class_min], seqs[i_class_max])
-    sampled_labels = np.append(labels[upsample_class_min], labels[i_class_max])
+    sampled_seqs = np.hstack((seqs[upsample_class_min], seqs[i_class_max]))
+    sampled_labels = np.hstack((labels[upsample_class_min], labels[i_class_max]))
     return(sampled_seqs, sampled_labels)
 
 def trim_seqs(seqs: List[str], n: int) -> List[str]:
@@ -106,3 +103,38 @@ def trim_seqs(seqs: List[str], n: int) -> List[str]:
 		new_seq = seq[i:i+n]
 		trimmed_seqs.append(new_seq)
 	return(trimmed_seqs)
+
+def sample_seqs2(
+        seqs: List[str],
+        labels: List[bool]) -> Tuple[List[str], List[bool]]:
+    """
+    This function should sample your sequences to account for class imbalance. 
+    Consider this as a sampling scheme with replacement.
+    
+    Args:
+        seqs: List[str]
+            List of all sequences.
+        labels: List[bool]
+            List of positive/negative labels
+
+    Returns:
+        sampled_seqs: List[str]
+            List of sampled sequences which reflect a balanced class size
+        sampled_labels: List[bool]
+            List of labels for the sampled sequences
+    """    
+    # get minority class -- if the sum of the labels (T = 1, F = 0) is less than
+    # half the length of the label list then there are more Falses than Trues
+    min_class = sum(labels) < (len(labels)/2)
+    i_class_min = np.where(labels == min_class)[0]
+    i_class_max = np.where(labels != min_class)[0]
+    n_class_min = len(i_class_min)
+    n_class_max = len(i_class_max)
+    print("number of samples in minority class: " + str(n_class_min))
+    print("number of samples in majority class: " + str(n_class_max))
+    
+    # upsample from minority class to match size of majority class
+    upsample_class_min = np.random.choice(i_class_min, size = n_class_max, replace = True)
+    sampled_seqs = np.vstack((seqs[upsample_class_min], seqs[i_class_max])) # vstack instead of hstack
+    sampled_labels = np.hstack((labels[upsample_class_min], labels[i_class_max]))
+    return(sampled_seqs, sampled_labels)

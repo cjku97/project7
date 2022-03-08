@@ -128,10 +128,10 @@ class NeuralNetwork:
             cache: Dict[str, ArrayLike]:
                 Dictionary storing Z and A matrices from `_single_forward` for use in backprop.
         """
-        print("FORWARD")
+        # print("FORWARD")
         (num_features, batch_size) = X.shape
-        print("batch size: " + str(batch_size))
-        print("n features: " + str(num_features))
+        # print("batch size: " + str(batch_size))
+        # print("n features: " + str(num_features))
         # initialize cache dictionary
         cache = {}
         cache['X'] = X
@@ -283,7 +283,7 @@ class NeuralNetwork:
         # iterate through param dictionary
         for idx, layer in enumerate(reversed(self.arch)):
             layer_idx = idx + 1
-            print("layer: " + str(layer_idx))
+            # print("layer: " + str(layer_idx))
             # get weight matrix
             W = self._param_dict['W' + str(layer_idx)]
             # get bias matrix
@@ -293,12 +293,12 @@ class NeuralNetwork:
             # get bias change matrix
             db = grad_dict['db' + str(layer_idx)]
             # update weight matrix
-            print("mean weight: " + str(np.mean(W)))
-            print("mean weight change: " + str(np.mean(self._lr * dW)))
+            # print("mean weight: " + str(np.mean(W)))
+            # print("mean weight change: " + str(np.mean(self._lr * dW)))
             self._param_dict['W' + str(layer_idx)] = W - (self._lr * dW)
             # update bias matrix
-            print("mean bias: " + str(np.mean(b)))
-            print("mean bias change: " + str(np.mean(self._lr * db)))
+            # print("mean bias: " + str(np.mean(b)))
+            # print("mean bias change: " + str(np.mean(self._lr * db)))
             self._param_dict['b' + str(layer_idx)] = b - (self._lr * db)
         return
 
@@ -344,8 +344,6 @@ class NeuralNetwork:
         	# get predictions
         	train_predict = self.predict(X_train)
         	val_predict = self.predict(X_val)
-        	print(val_predict[0:10])
-        	print(y_val[0:10])
         	if self._loss_func.lower() == "bce":
         		per_epoch_loss_train.append(self._binary_cross_entropy(y_train, train_predict))
         		per_epoch_loss_val.append(self._binary_cross_entropy(y_val, val_predict))
@@ -372,7 +370,7 @@ class NeuralNetwork:
             y_hat: ArrayLike
                 Prediction from the model.
         """
-        print("MAKING PREDICTION")
+        # print("MAKING PREDICTION")
         (y_hat,_) = self.forward(X) # is this correct?
         return(y_hat)
 
