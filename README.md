@@ -76,25 +76,25 @@ TODO:
 # Grading (50 points total)
 
 ## Implementation of API (15 points)
-* Proper implementation of NeuralNetwork class (13 points)
-* Proper implementation of 'one_hot_encode_seqs' function (1 point)
-* Proper implementation of 'sample_seqs' function (1 point)
+* [NOT CORRECT] Proper implementation of NeuralNetwork class (13 points)
+* [DONE] Proper implementation of 'one_hot_encode_seqs' function (1 point)
+* [DONE] Proper implementation of 'sample_seqs' function (1 point)
 
 ## Autoencoder (10 points)
-* Read in dataset and generate train and validation splits (2 points)
-* Successfully train your autoencoder (4 points)
-* Plots of training and validation loss (2 points)
+* [DONE] Read in dataset and generate train and validation splits (2 points)
+* [LMAO] Successfully train your autoencoder (4 points)
+* [DONE] Plots of training and validation loss (2 points)
 * Explanation of hyperparameters (1 point)
 * Quantification of reconstruction error (1 point)
 
 ## Transcription Factor Classifier (15 points)
-* Correctly read in all data (2 points)
+* [DONE] Correctly read in all data (2 points)
 * Explanation of your sampling scheme (2 points)
-* Proper generation of a training set and a validation set (2 point)
-* Successfully train your classifeir (4 points)
+* [DONE] Proper generation of a training set and a validation set (2 point)
+* [MAYBE] Successfully train your classifeir (4 points)
 * Explain the choice of your loss function in the jupyter notebook (2 points)
 * Plots of training and validation loss (2 points)
-* Print out accuracy of the classifier on the testing set (1 point)
+* [DONE] Print out accuracy of the classifier on the testing set (1 point)
 
 ## Testing (7 points)
 Proper unit tests for:
@@ -110,7 +110,7 @@ Proper unit tests for:
 * sample_seqs function (0.5 points)
 
 ## Packaging (3 points)
-* pip installable (1 point)
+* [DONE] pip installable (1 point)
 * github actions (installing + testing) (2 points)
 
 
