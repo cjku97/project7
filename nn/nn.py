@@ -72,7 +72,6 @@ class NeuralNetwork:
         	param_dict['W' + str(layer_idx)] = np.random.randn(output_dim, input_dim) * 0.1
         	# initializing bias matrices
         	param_dict['b' + str(layer_idx)] = np.random.randn(output_dim, 1) * 0.1
-        print("hello")
         return param_dict
     
     def _single_forward(self, W_curr: ArrayLike, b_curr: ArrayLike, A_prev: ArrayLike, activation: str) -> Tuple[ArrayLike, ArrayLike]:
@@ -413,7 +412,7 @@ class NeuralNetwork:
         """
         sig_Z = self._sigmoid(Z)
         sig_prime_Z = sig_Z * (1 - sig_Z)
-        dZ = dA * sig_prime_Z 
+        dZ = dA * sig_prime_Z
         return(dZ)
 
     def _relu_backprop(self, dA: ArrayLike, Z: ArrayLike) -> ArrayLike:
@@ -431,7 +430,7 @@ class NeuralNetwork:
                 Partial derivative of current layer Z matrix.
         """
         relu_prime_Z = (Z > 0) * 1
-        dZ = dA * relu_prime_Z 
+        dZ = dA * relu_prime_Z
         return(dZ)
 
     def _binary_cross_entropy(self, y: ArrayLike, y_hat: ArrayLike) -> float:
