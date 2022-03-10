@@ -35,13 +35,7 @@ class NeuralNetwork:
         arch: list of dicts
             This list of dictionaries describing the fully connected layers of the artificial neural network.
     """
-    def __init__(self,
-                 nn_arch: List[Dict[str, Union[int, str]]],
-                 lr: float,
-                 seed: int,
-                 batch_size: int,
-                 epochs: int,
-                 loss_function: str):
+    def __init__(self, nn_arch: List[Dict[str, Union[int, str]]], lr: float, seed: int, batch_size: int, epochs: int, loss_function: str):
         # Saving architecture
         self.arch = nn_arch
         # Saving hyperparameters
@@ -71,20 +65,17 @@ class NeuralNetwork:
         param_dict = {}
         # initializing all layers in the NN
         for idx, layer in enumerate(self.arch):
-            layer_idx = idx + 1
-            input_dim = layer['input_dim']
-            output_dim = layer['output_dim']
-            # initializing weight matrices
-            param_dict['W' + str(layer_idx)] = np.random.randn(output_dim, input_dim) * 0.1
-            # initializing bias matrices
-            param_dict['b' + str(layer_idx)] = np.random.randn(output_dim, 1) * 0.1
+        	layer_idx = idx + 1
+        	input_dim = layer['input_dim']
+        	output_dim = layer['output_dim']
+        	# initializing weight matrices
+        	param_dict['W' + str(layer_idx)] = np.random.randn(output_dim, input_dim) * 0.1
+        	# initializing bias matrices
+        	param_dict['b' + str(layer_idx)] = np.random.randn(output_dim, 1) * 0.1
+        print("hello")
         return param_dict
-
-    def _single_forward(self,
-                        W_curr: ArrayLike,
-                        b_curr: ArrayLike,
-                        A_prev: ArrayLike,
-                        activation: str) -> Tuple[ArrayLike, ArrayLike]:
+    
+    def _single_forward(self, W_curr: ArrayLike, b_curr: ArrayLike, A_prev: ArrayLike, activation: str) -> Tuple[ArrayLike, ArrayLike]:
         """
         This method is used for a single forward pass on a single layer.
 
@@ -529,6 +520,7 @@ class NeuralNetwork:
             loss: float
                 Average loss of mini-batch.
         """
+        raise ValueError("Alternate loss function is not implemented")
         pass
 
     def _loss_function_backprop(self, y: ArrayLike, y_hat: ArrayLike) -> ArrayLike:
@@ -542,4 +534,5 @@ class NeuralNetwork:
             dA (array-like): partial derivative of loss with respect
                 to A matrix.
         """
+        raise ValueError("Alternate loss function backprop is not implemented")
         pass

@@ -15,8 +15,22 @@ def main():
 	positives = io.read_text_file("data/rap1-lieb-positives.txt")
 	negatives = io.read_fasta_file("data/yeast-upstream-1k-negative.fa")
 	
+	"""
+	Because the negative sequences are longer than the positive sequences, I wrote a 
+	function in preprocess.py, trim_seqs, that randomly selects a consecutive sequence
+	of 17 nucleotides from each negative sequence.
+	"""
+	
 	# trim negative sequences
 	trim_negatives = preprocess.trim_seqs(negatives, len(positives[0]))
+	
+	"""
+	Because there are more negative than positive examples in this dataset, I use an 
+	upsampling scheme to increase the number of positive examples to match the number
+	of negative examples. In preprocess.py, the sample_seqs function samples from 
+	the positive (minority class) with replacement until there are the same number as the 
+	negative (majority class) samples. 
+	"""
 	
 	# generate training set
 	all_seqs = np.asarray(positives + trim_negatives)
@@ -41,6 +55,14 @@ def main():
 	test_arch = [{'input_dim': 68, 'output_dim': 17, 'activation': 'sigmoid'},
 				  {'input_dim': 17, 'output_dim': 68, 'activation': 'sigmoid'},
 				  {'input_dim': 68, 'output_dim': 1, 'activation': 'sigmoid'}]
+	
+	"""
+	Selection of hyperparamaters:
+	I selected the Binary Cross Entropy loss function because the network is using logistic
+	regression to separate the input into two classes: Rap1 binding site or non-binding site.
+	The other hyperparameters were selected through trial and error until I got acceptable
+	results.
+	"""
 	
 	test_nn = nn.NeuralNetwork(nn_arch = test_arch, lr = 0.005, seed = 29, batch_size = 300,
 								epochs = 50, loss_function = "bce")
